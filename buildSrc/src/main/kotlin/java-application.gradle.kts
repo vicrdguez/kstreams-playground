@@ -26,7 +26,7 @@ tasks.build {
 
 task("runApp", JavaExec::class){
     //reading gradle command arguments
-    val propsFile = properties["cfg"] ?: "$buildDir/resources/main/client.properties"
+    val propsFile = properties["cfg"] ?: "$buildDir/resources/main/kafka.properties"
     val classUsed = properties["javaClass"] ?: "App"
     println("Properties file used: $propsFile")
     println("Project: ${project.displayName} " +
