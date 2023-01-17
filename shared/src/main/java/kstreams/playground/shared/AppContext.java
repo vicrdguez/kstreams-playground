@@ -35,6 +35,14 @@ public class AppContext {
         return config;
     }
 
+    public static String getConfig(String key, String defaultValue) {
+        if(config.containsKey(key)){
+            return config.getProperty(key);
+        }
+
+        return defaultValue;
+    }
+
     public static void loadConfig(String[] args) throws IOException {
 
         final InputStream propertiesStream;

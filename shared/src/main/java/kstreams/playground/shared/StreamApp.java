@@ -40,6 +40,13 @@ public abstract class StreamApp {
         });
 
         logger.warn("Streams topology \n {}", topology.describe());
+
+        boolean doCleanUp = Boolean.parseBoolean(AppContext.getConfig("kstreams.cleanup", "true"));
+        if (doCleanUp) {
+            logger.warn("Executing cleanup befor starting");
+            kafkaStreams.cleanUp();
+        }
+
         kafkaStreams.start();
         Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreams::close));
         AppContext.setKafkaStreams(kafkaStreams);
