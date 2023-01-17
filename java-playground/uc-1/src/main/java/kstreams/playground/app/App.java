@@ -23,6 +23,7 @@ import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.Repartitioned;
 import org.apache.kafka.streams.state.Stores;
 import org.apache.kafka.streams.state.internals.ValueAndTimestampSerde;
 
@@ -35,7 +36,7 @@ public class App extends StreamApp {
 
 //        extraProperties.setProperty(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, "0");
 //        extraProperties.setProperty(StreamsConfig.STATE_DIR_CONFIG, "/tmp/tweet-filter");
-        extraProperties.setProperty(StreamsConfig.APPLICATION_ID_CONFIG, "time-repetition-based-trigger-app");
+        extraProperties.setProperty(StreamsConfig.APPLICATION_ID_CONFIG, "uc-1-app");
         extraProperties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, StringSerde.class.getName());
         extraProperties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class.getName());
         extraProperties.setProperty(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
@@ -66,7 +67,12 @@ public class App extends StreamApp {
 
         builder
             .stream(Constant.TOPIC_INPUT, Consumed.with(stringSerde, pageviewsSerde))
-            .peek((key, value) -> logger.debug("[VIC] observed event ==>  {}", value))
+            .peek((key, value) -> logger.debug("{} observed event ==>  {}", Constant.LOG_PREFIX, value))
+            // the data has the `viewtime` as the key, we need the `userid` hence we select the new
+            // key from the value
+            .selectKey((key, value) -> value.getUserid())
+            // Then we trigger the repartition explicitly
+            .repartition(Repartitioned.as("user-id-repartition"))
             .process(() -> new KeyRepeatedInWindowProcessor(Duration.ofMinutes(5)),
                 Named.as("key-repeated-in-window-processor"),
                 Constant.PAGE_ID_TS_STORE)

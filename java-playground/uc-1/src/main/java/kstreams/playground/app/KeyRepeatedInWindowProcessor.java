@@ -49,9 +49,10 @@ public class KeyRepeatedInWindowProcessor implements Processor<String, pageviews
             Constant.LOG_PREFIX,
             record.key(),
             pageIdAndTs.value(),
-            windowSize,
+            windowSize.toMinutes(),
             durationOnPage.toMinutes());
 
+        pageIdTsStore.delete(record.key());
         localContext.forward(record);
       }
     }
