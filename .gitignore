@@ -6,3 +6,4 @@ build
 /.java-version
 /.idea
 
+/java-playground/uc-1/src/main/resources/kafka.properties
